@@ -241,6 +241,7 @@ EOF;
             'not like' => 'buildLikeCondition',
             'or like' => 'buildLikeCondition',
             'or not like' => 'buildLikeCondition',
+            'moreq' => 'buildMoreqCondition'
         ];
 
         if (!is_array($condition)) {
@@ -398,4 +399,17 @@ EOF;
     {
         throw new NotSupportedException('LIKE conditions are not suppoerted by redis ActiveRecord.');
     }
+    
+    private function buildMoreqCondition($operator, $operands, &$columns)
+    {
+        if (!isset($operands[0], $operands[1])) {
+            throw new Exception("Operator '$operator' requires two operands.");
+        }
+
+        list($column, $value1) = $operands;
+        $column = $this->addColumn($column, $columns);
+
+	    return "tonumber($column) ~= nil and tonumber($column) >= $value1";
+    }
+    
 }
